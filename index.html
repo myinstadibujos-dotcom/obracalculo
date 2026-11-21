@@ -52,6 +52,8 @@ body:not([data-tab="D"]) .tD,body:not([data-tab="R"]) .tR,body:not([data-tab="P"
 #welcome{display:none}body.vacio #welcome{display:grid;place-items:center;min-height:60vh;padding:24px}body.vacio #tabs,body.vacio #ct>.pg,body.vacio #pr .pg{display:none}
 .wc{text-align:center;max-width:520px}.wc h2{font-size:22px;text-transform:none;color:var(--tx);letter-spacing:0}.wc p{color:var(--mu)}.wb{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0}.wb button{padding:10px 16px;font-size:14px}
 body.vacio #pjd,body.vacio #pjx{opacity:.4;pointer-events:none}
+body.blk .tD,body.blk .tR{display:none}#blhint{display:none}body.blk:not([data-tab="P"]) #blhint{display:block}
+input::placeholder{color:var(--mu);opacity:.6;font-style:italic}
 </style></head><body data-tab="D">
 <div id="app">
 <div id="mb"><span class="brand">ObraCálculo</span><details class="mn"><summary>Archivo</summary><div class="dd"><button data-act="nuevo">Nuevo proyecto</button><button data-act="abrir">Abrir…</button><button data-act="guardar">Guardar  (Ctrl+S)</button><button data-act="guardarcomo">Guardar como…</button><hr><button data-act="imprimir">Imprimir / PDF</button></div></details><details class="mn"><summary>Elemento</summary><div class="dd"><button data-act="pja">Viga nueva</button><button data-act="pjp">Dado / pila / columna</button><button data-act="pjz">Zapata</button><hr><button data-act="pjd">Duplicar elemento</button><button data-act="pjx">Eliminar elemento</button></div></details><details class="mn"><summary>Ver</summary><div class="dd"><button data-act="tab-D">Pestaña Elemento</button><button data-act="tab-R">Pestaña Resultados</button><button data-act="tab-P">Pestaña Proyecto</button><hr><button data-act="tema-auto">Tema automático</button><button data-act="tema-light">Tema claro</button><button data-act="tema-dark">Tema oscuro</button></div></details><details class="mn"><summary>Ayuda</summary><div class="dd"><button data-act="instalar" id="mi" style="display:none">Instalar como aplicación</button><button data-act="acerca">Acerca de y alcance</button></div></details><span class="sp"></span><span class="sub">Cuantificación de obra y verificación NSR-10</span></div>
@@ -60,6 +62,7 @@ body.vacio #pjd,body.vacio #pjx{opacity:.4;pointer-events:none}
 <aside id="sb"><div class="ph">Proyecto</div><div class="pg"><label>Nombre del proyecto<input id="pjn"></label><div id="pjl"></div><p class="note">Clic en un elemento para editarlo. Marca Σ en los que quieres sumar en los materiales del proyecto.</p></div></aside>
 <section id="ct"><div id="welcome"><div class="wc"><h2>Proyecto vacío</h2><p>Empieza agregando el primer elemento o abre un archivo guardado.</p><div class="wb"><button data-act="pja">＋ Viga</button><button data-act="pjp">＋ Dado / pila / columna</button><button data-act="pjz">＋ Zapata</button></div><div class="wb"><button data-act="abrir">Abrir archivo…</button></div><div class="wb"><button id="wrec" style="display:none"></button></div></div></div><div id="tabs"><button class="tab on" data-t="D">Elemento</button><button class="tab" data-t="R">Resultados <span id="bdg"></span></button><button class="tab" data-t="P">Proyecto y materiales</button></div>
 <div class="pg">
+<div class="card" id="blhint"><h2>Elemento en blanco</h2><p id="blmsg" class="note" style="font-size:14px;margin:0"></p></div>
 <div class="card tD bv"><h2>Ver / ocultar</h2><div class="g" id="vis"></div><label style="margin-top:8px">Zoom horizontal del alzado<input type="range" id="zm" min="50" max="300" value="100"></label></div>
 <div class="card tD bv"><h2>Alzado (despiece)</h2><div class="bt" style="margin:0 0 8px"><button id="md">Dibujar barra: apagado</button><select id="xd" style="width:auto"></select><button id="cx">Borrar adicionales</button><button id="dl">Eliminar barra seleccionada (Supr)</button><button id="ad">Restaurar +1 barra</button></div><p class="note" id="sl" style="margin:0 0 8px"></p><div class="sc" id="elev"></div><p class="note">Estilo plano: ejes, distancia entre ejes, luz libre, estribos por vano y bastones sobre apoyos (azul). Arrastra los puntos naranja para estirar o acortar un tramo de barra. Las L= incluyen la patilla de los ganchos en los extremos. Desliza para ver todo. Alturas no a escala.</p></div>
 <div class="card tD bv"><h2>Ejes y vanos (editable)</h2><div class="bt" style="margin:0 0 8px;flex-wrap:wrap;align-items:center"><span class="note" style="margin:0">Nombre de los ejes:</span><button id="axl">Letras</button><button id="axn">Números</button><label class="ck">Desde <input id="axs" style="width:80px" placeholder="A, 1, E1…"></label></div><div id="axui" class="sc"></div><div class="bt"><button id="av">+ Agregar vano</button><button id="qv">− Quitar último eje</button></div><p class="note">Cambiar la distancia a un eje corre los ejes siguientes (y el largo total si el último eje estaba en el extremo). Los estribos por vano reemplazan el valor general solo en ese vano.</p></div>
@@ -428,7 +431,7 @@ $("pjtot").innerHTML=`<table><tr><th>Elemento</th><th>Concreto (m³)</th><th>Ace
 <h2 style="margin-top:14px">Encofrado y amarre</h2><table><tr><td>Área de formaleta</td><td>${f(A,2)} m²</td></tr><tr><td>Tablas de ${P0.an} cm × ${P0.lt} m (${P0.us} usos)</td><td>${tab} und</td></tr><tr><td>Listones de ${P0.ll} m</td><td>${lis} und</td></tr><tr><td>Puntillas</td><td>${f(A*P0.pu,1)} kg</td></tr><tr><td>Alambre de amarre (${f(sum("ties"),0)} amarres)</td><td>${f(alm,0)} m = ${f(alm*.0089,1)} kg</td></tr>${sum("exc")>0?`<tr><td>Excavación</td><td>${f(sum("exc"),2)} m³</td></tr>`:""}${sum("sol")>0?`<tr><td>Solado e = 5 cm</td><td>${f(sum("sol"),2)} m³</td></tr>`:""}${sum("rel")>0?`<tr><td>Relleno compactado (95 % Proctor modificado)</td><td>${f(sum("rel"),2)} m³</td></tr>`:""}</table>`}
 $("pjl").onclick=e=>{if(e.target.closest(".ck")){const c=e.target.closest("input");if(c){PRJ.els[+c.dataset.c].inc=c.checked?1:0;pjStore();prjUI()}return}const r=e.target.closest("[data-i]");if(r){selEl(+r.dataset.i);$("sb").classList.remove("open")}};
 $("pjn").oninput=()=>{if(PRJ){PRJ.name=$("pjn").value;pjStore()}};
-$("pja").onclick=()=>{pjStore();const nm="Viga "+(PRJ.els.length+1);PRJ.els.push({name:nm,inc:1,st:null,res:null});PRJ.cur=PRJ.els.length-1;ldSt(defSt(nm));pjList()};
+$("pja").onclick=()=>{pjStore();const nm="Viga "+(PRJ.els.length+1);PRJ.els.push({name:nm,inc:1,st:null,res:null});PRJ.cur=PRJ.els.length-1;ldSt(blk(defSt(nm),"v"));pjList()};
 $("pjd").onclick=()=>{if(!PRJ.els.length)return;pjStore();const c=PRJ.els[PRJ.cur],st=JSON.parse(JSON.stringify(c.st));st.f[st.t=="z"?"z_nm":st.t=="p"?"p_nm":"nm"]=c.name+" (copia)";PRJ.els.push({name:c.name+" (copia)",inc:1,t:st.t,st,res:null});PRJ.cur=PRJ.els.length-1;ldSt(st);pjList()};
 $("pjx").onclick=()=>{if(!PRJ.els.length)return;if(!confirm("¿Eliminar «"+PRJ.els[PRJ.cur].name+"»?"))return;PRJ.els.splice(PRJ.cur,1);if(!PRJ.els.length){PRJ.cur=-1;pjList();pjStore();prjUI();return}PRJ.cur=Math.max(0,PRJ.cur-1);ldSt(stOf(PRJ.els[PRJ.cur]));pjList();pjStore();prjUI()};
 $("pjs").onclick=()=>pjStore();
@@ -457,8 +460,8 @@ to(0,H-rc);ar(rc,H-rc,rc,180,90);to(W-rc,H);ar(W-rc,H-rc,rc,90,0);to(W,rc);ar(W-
 if(gk=="135°"){ar(g,g,g,-90,-225);to(g-q*g+lgu*q,g+q*g+lgu*q)}else if(gk=="90°"){ar(g,g,g,-90,-180);to(0,g+lgu)}else{ar(g,g,g,-90,-270);to(g+lgu,2*g)}
 return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(P2,false,"centripetal"),300,rad,8,false)}
 let TPd=0;const debP=()=>{clearTimeout(TPd);TPd=setTimeout(updP,150)};Object.values(elsP).forEach(e=>e.addEventListener("input",debP));elsP.p_psi.addEventListener("input",()=>{setMixP();debP()});
-$("pjp").onclick=()=>{pjStore();const nm="Dado "+(PRJ.els.length+1);PRJ.els.push({name:nm,inc:1,t:"p",st:null,res:null});PRJ.cur=PRJ.els.length-1;ldSt(defStP(nm));pjList()};
-function updP(){const b=gP("p_b"),d=gP("p_d"),zb=gP("p_zb"),zt=gP("p_zt"),zg=gP("p_zg"),H=(zt-zb)*100,r=gP("p_r"),q=Math.max(1,Math.round(gP("p_q")));if(b<=0||d<=0||H<=0)return;
+$("pjp").onclick=()=>{pjStore();const nm="Dado "+(PRJ.els.length+1);PRJ.els.push({name:nm,inc:1,t:"p",st:null,res:null});PRJ.cur=PRJ.els.length-1;ldSt(blk(defStP(nm),"p"));pjList()};
+function updP0(){const b=gP("p_b"),d=gP("p_d"),zb=gP("p_zb"),zt=gP("p_zt"),zg=gP("p_zg"),H=(zt-zb)*100,r=gP("p_r"),q=Math.max(1,Math.round(gP("p_q")));if(b<=0||d<=0||H<=0)return;
 const kd=elsP.p_dl.value,ke=elsP.p_de.value,kp=elsP.p_pd.value,dl=BARS[kd][0]/10,ds=BARS[ke][0]/10,dp=BARS[kp][0]/10,nl=Math.max(0,Math.round(gP("p_nl"))),Ll=gP("p_ll")*100,lo=gP("p_lo"),s=gP("p_s"),o1=gP("p_o1"),o2=gP("p_o2"),tu=elsP.p_tu.value=="Sí",Dc=tu?gP("p_td")/10:0,te=tu?Math.min(gP("p_te"),H/100):0,pl=gP("p_pl"),ew=gP("p_ew"),lc=gP("p_lc")||.2,ta=Math.min(gP("p_th")*100,60);
 const ZS=[];if(s>0&&H-o1-o2>=0){for(let z=o1;z<=H-o2+1e-6;z+=s)ZS.push(z);if(H-o2-ZS[ZS.length-1]>.5)ZS.push(H-o2)}
 const pp=tu?elsP.p_pp.value.replace(/;/g," ").split(" ").filter(x=>x).map(x=>parseFloat(x.replace(",","."))).filter(x=>!isNaN(x)):[],gsK=elsP.p_gs.value,ls=legSP(),sLen=2*((b-2*r)+(d-2*r))+2*ls;
@@ -515,8 +518,8 @@ const elsZ={},DEFZ={},defStZ=nm=>({t:"z",f:Object.assign({},DEFZ,{z_nm:nm})});
 $("formZ").innerHTML=FZ.map(s=>`<div class="card"><h2>${s[0]}</h2><div class="g">${s.slice(1).map(([id,lb,a,b])=>{const c=Array.isArray(a)?`<select id="${id}">${a.map(o=>`<option ${o==b?"selected":""}>${o}</option>`).join("")}</select>`:`<input id="${id}" value="${a}" ${typeof a=="number"?'inputmode="decimal"':""}>`;return`<label class="${b=="w"?"w":""}">${lb}${c}</label>`}).join("")}</div></div>`).join("");
 FZ.forEach(s=>s.slice(1).forEach(x=>elsZ[x[0]]=$(x[0])));
 let TZd=0;const debZ=()=>{clearTimeout(TZd);TZd=setTimeout(updZ,150)};Object.values(elsZ).forEach(e=>e.addEventListener("input",debZ));
-$("pjz").onclick=()=>{pjStore();const nm="Zapata "+(PRJ.els.length+1);PRJ.els.push({name:nm,inc:1,t:"z",st:null,res:null});PRJ.cur=PRJ.els.length-1;ldSt(defStZ(nm));pjList()};
-function updZ(){const g=k=>parseFloat(String(elsZ[k].value).replace(",","."))||0;
+$("pjz").onclick=()=>{pjStore();const nm="Zapata "+(PRJ.els.length+1);PRJ.els.push({name:nm,inc:1,t:"z",st:null,res:null});PRJ.cur=PRJ.els.length-1;ldSt(blk(defStZ(nm),"z"));pjList()};
+function updZ0(){const g=k=>parseFloat(String(elsZ[k].value).replace(",","."))||0;
 const i={B:g("z_B"),L:g("z_L"),h:g("z_h"),r:g("z_r"),zb:g("z_zb"),zg:g("z_zg"),ew:g("z_ew"),so:elsZ.z_so.value,exp:elsZ.z_ex.value,q:g("z_q"),psi:+elsZ.z_psi.value,fy:g("z_fy"),wst:g("z_wst"),dx:elsZ.z_dx.value,sx:g("z_sx"),dy:elsZ.z_dy.value,sy:g("z_sy"),gancho:elsZ.z_gk.value,cw:g("z_cw"),cb:g("z_cb"),nd:Math.round(g("z_nd")),dd:elsZ.z_dd.value,proy:g("z_pr"),P:g("z_P"),qadm:g("z_qa")};
 if(i.B<=0||i.L<=0||i.h<=0||i.sx<=0||i.sy<=0)return;
 const z=MOTOR.calcZapata(i),R0=z.res,bl=(PRJ?PRJ.pp.bl:12)*100,pk=packP(R0.pc,bl),NB=pk.reduce((a,x)=>a+x.n,0),KB=pk.reduce((a,x)=>a+x.kg,0);RES=R0;
@@ -587,7 +590,7 @@ const dl=lapsX().sort((a,b)=>a.a-b.a);$("ldui").innerHTML=dl.length?`<h2 style="
 $("elev").addEventListener("pointerdown",e=>{const t=e.target.closest(".hd");if(!t)return;e.preventDefault();const j=+t.dataset.j,k=+t.dataset.e;DRG={j,k,x:e.clientX,v:SEG[j][k]};DR=1});
 addEventListener("pointermove",e=>{if(!DRG)return;const v=Math.round((DRG.v+(e.clientX-DRG.x)/ES)/.05)*.05;OV[DRG.j]=OV[DRG.j]||[0,0];OV[DRG.j][DRG.k]=v-SEG0[DRG.j][DRG.k];upd()});
 addEventListener("pointerup",()=>{if(DRG){DRG=null;DR=0;upd()}});
-function upd(){
+function upd0(){
 const L=n("L"),b=n("b"),h=n("h"),r=n("r"),sc=n("sc")/100,sm=n("sm")/100,pw=n("pw"),pb=n("pb"),ph=n("ph");
 if(L<=0||b<=0||h<=0||sc<=0||sm<=0||L>200)return;
 const Q=els.ps.value.split(/[;,\s]+/).map(s=>{const[a,t]=s.split(":");return[parseFloat(a),/^c/i.test(t||"")?"C":"P"]}).filter(q=>!isNaN(q[0])&&q[0]>=0&&q[0]<=L).sort((a,c)=>a[0]-c[0]);P=Q.map(q=>q[0]);TY=Q.map(q=>q[1]);
@@ -724,4 +727,22 @@ let REC=null;try{REC=JSON.parse(localStorage.getItem("despiece_v1")||"null");if(
 if(REC){const b=$("wrec");b.style.display="";b.textContent="Recuperar el último trabajo automático: "+(REC.name||"sin nombre")+" ("+REC.els.length+" elementos)";b.onclick=()=>{try{pjLoad(REC);$("fn").textContent="Recuperado del guardado automático"}catch(e){alert("No se pudo recuperar.")}}}
 function axRef(){AXL=[];if(document.activeElement!==$("axs"))$("axs").value=AXS;P.forEach((p,i)=>{const e=$("al"+i);if(e)e.value=axLb(i)});upd()}
 $("axl").onclick=()=>{AXS="A";axRef()};$("axn").onclick=()=>{AXS="1";axRef()};$("axs").oninput=e=>{AXS=e.target.value.trim()||"A";axRef()};
+
+/* ==== v3: elementos nuevos en blanco ==== */
+const BLK={
+ v:{E:()=>els,D:DEF,ess:["L","b","h"],nm:"nm",o:()=>upd0(),fb:{ps:g=>"0:C,"+g("L")+":C",sx:g=>String(+(g("L")/2).toFixed(3))}},
+ p:{E:()=>elsP,D:DEFP,ess:["p_b","p_d","p_zb","p_zt"],nm:"p_nm",o:()=>updP0(),fb:{p_ll:g=>{const l=+(g("p_zt")-g("p_zb")-.15).toFixed(3);return l>.1?String(l):undefined}}},
+ z:{E:()=>elsZ,D:DEFZ,ess:["z_B","z_L","z_h"],nm:"z_nm",o:()=>updZ0(),fb:{}}};
+const BLA={ps:"0:C, L:C (automático)",sx:"L/2 (automático)",p_ll:"automática según las cotas"};
+for(const T in BLK){const c=BLK[T],E=c.E();for(const k in E){const e=E[k];if(e&&e.tagName=="INPUT"&&k!=c.nm&&c.D[k]!==undefined)e.placeholder=BLA[k]||String(c.D[k])}}
+const lblOf=e=>{const l=e.closest("label"),s=l&&l.childNodes[0]&&l.childNodes[0].textContent;return(s||e.id).trim()};
+function blk(st,t){const E=t=="z"?elsZ:t=="p"?elsP:els,nmk=BLK[t].nm;for(const k in st.f){const e=E[k];if(k!=nmk&&e&&e.tagName=="INPUT")st.f[k]=""}if(t=="p")st.f.p_tu="No";return st}
+function blRun(T){const c=BLK[T],E=c.E(),g=k=>parseFloat(String(E[k].value).replace(",","."))||0;
+ const miss=c.ess.filter(k=>String(E[k].value).trim()==="");const filled=[];
+ for(const k in E){const e=E[k];if(!e||e.tagName!=="INPUT"||k==c.nm||String(e.value).trim()!=="")continue;if(c.D[k]!==undefined){e.value=c.D[k];filled.push([k,String(c.D[k])])}}
+ for(const k in c.fb){const f=filled.find(x=>x[0]==k);if(!f)continue;const v=c.fb[k](g);if(v!==undefined){E[k].value=v;f[1]=String(v)}}
+ try{c.o()}finally{filled.forEach(([k,v])=>{if(E[k].value===v)E[k].value=""})}
+ document.body.classList.toggle("blk",miss.length>0);
+ if(miss.length){RES=null;$("blmsg").innerHTML="Para dibujar y calcular faltan estas medidas: <b>"+miss.map(k=>lblOf(E[k])).join(", ")+"</b>. Escríbelas en el panel Propiedades. Lo demás usa los valores en gris hasta que escribas los tuyos."}}
+function upd(){blRun("v")}function updP(){blRun("p")}function updZ(){blRun("z")}
 </script></body></html>
