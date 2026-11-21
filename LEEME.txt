@@ -1,0 +1,13 @@
+CÓMO PUBLICAR ObraCálculo (una sola vez, sin comandos)
+
+1. Crea una cuenta gratis en github.com e inicia sesión.
+2. Arriba a la derecha: "+" > "New repository". Nombre: obracalculo. Déjalo en Public. Pulsa "Create repository".
+3. En la página del repositorio pulsa "uploading an existing file" y ARRASTRA el contenido de esta carpeta
+   (index.html, sw.js, manifest.webmanifest y la carpeta icons). Pulsa "Commit changes".
+4. Ve a Settings > Pages. En "Branch" elige main y carpeta /(root). Guarda.
+5. Espera 1-2 minutos. Tu programa quedará en:  https://TU-USUARIO.github.io/obracalculo/
+6. Ábrelo con Chrome o Edge y pulsa el icono de instalar en la barra de direcciones
+   (o el menú Ayuda > "Instalar como aplicación").
+
+PARA ACTUALIZAR: en el repositorio pulsa "Add file > Upload files", arrastra el nuevo index.html (reemplaza al anterior)
+y "Commit changes". La próxima vez que abras el programa con internet ya tendrá la versión nueva.
